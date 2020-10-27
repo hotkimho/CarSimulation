@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<script src="examples/js/libs/dat.gui.min.js"></script>
+		<link rel="stylesheet" href="gamesrc/js/bulma-0.9.0/css/bulma.css" />
+		<link rel="stylesheet" href="dashboard.css" />
+		<link
+			rel="stylesheet"
+			type="text/css"
+			href="node_modules/tui-chart/dist/tui-chart.min.css"
+		/>
+
+		<title>car</title>
+		<!--
+		<style>
+			body {
+				margin: 0;
+			}
+			canvas {
+				display: block;
+			}
+		</style>
+		--></head>
+	<body>
+		<div id="container">
+			<div id="dashboard" class="gui-box sim-mode-box">
+				<div
+					id="planner-error"
+					class="gui-box is-size-7 is-hidden"
+					style="background: #422b"
+				>
+					<span class="icon has-text-danger">
+						<i class="fas fa-exclamation-triangle"></i>
+					</span>
+					<span
+						class="has-text-grey-lighter"
+						style="position: relative; top: -2px"
+						>Error initializing motion planner.
+						<a
+							href="https://github.com/mattbradley/dash#browser-support"
+							target="_blank"
+							>Check if your browser is supported</a
+						>.</span
+					>
+				</div>
+				<div id="controls" class="is-pulled-left">
+					<div id="brake"></div>
+					<div id="gas"></div>
+					<div id="gear"></div>
+					<div id="wheel-wrapper">
+						<div id="wheel">
+							<div id="wheel-marker"></div>
+						</div>
+						<div id="wheel-pie">
+							<div id="wheel-pie-left"></div>
+							<div id="wheel-pie-right"></div>
+						</div>
+					</div>
+				</div>
+				<div id="stats" class="is-pulled-right">
+					<div class="columns is-gapless" style="margin-bottom: 16px">
+						<div class="column has-text-centered">
+							<div class="heading has-text-grey">SPEED</div>
+							<div
+								id="speed"
+								class="is-size-6 has-text-grey-lighter has-text-weight-bold"
+							>
+								&mdash;
+							</div>
+							<div
+								id="speed-units"
+								class="units-button is-size-7 has-text-grey"
+							>
+								M/S
+							</div>
+						</div>
+						<div class="column has-text-centered">
+							<div class="heading has-text-grey">TIME</div>
+							<div
+								id="time"
+								class="is-size-6 has-text-grey-lighter has-text-weight-bold"
+							>
+								&mdash;
+							</div>
+							<div
+								id="station-units"
+								class="units-button is-size-7 has-text-grey"
+							>
+								S
+							</div>
+						</div>
+						<div class="column has-text-centered">
+							<div class="heading has-text-grey">SCORE</div>
+							<div
+								id="score"
+								class="is-size-6 has-text-grey-lighter has-text-weight-bold"
+							>
+								100
+							</div>
+							<div
+								id="station-units"
+								class="units-button is-size-7 has-text-grey"
+							></div>
+						</div>
+					</div>
+					<div class="columns is-gapless">
+						<div class="column">
+							<div class="is-pulled-right">
+								<div
+									class="button is-small is-static is-pulled-left"
+									style="background: transparent; border: none"
+								>
+									<span class="icon is-medium has-text-grey-lighter">
+										<i class="fas fa-lg fa-car"></i>
+									</span>
+								</div>
+								<div class="buttons has-addons" style="padding-left: 8px">
+									<span
+										id="cam1"
+										class="button is-small is-dark is-outlined is-inverted"
+										>Cam1</span
+									>
+									<span
+										id="cam2"
+										class="button is-small is-dark is-outlined is-inverted"
+										>Cam2</span
+									>
+									<span
+										id="cam3"
+										class="button is-small is-dark is-outlined is-inverted"
+										>Cam3</span
+									>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div id="overlay">
+			<div id="warning"></div>
+		</div>
+
+		<script src="build/three.min.js"></script>
+		<script src="examples/js/loaders/OBJLoader.js"></script>
+		<script src="examples/js/loaders/FBXLoader.js"></script>
+		<script src="examples/js/libs/inflate.min.js"></script>
+		<script src="examples/js/libs/stats.min.js"></script>
+
+		<script src="/gamesrc/js/OrbitControls.js"></script>
+		<script src="/gamesrc/js/Detector.js"></script>
+		<script src="node_modules/cannon/build/cannon.min.js"></script>
+		<script src="examples/js/utils/SceneUtils.js"></script>
+		<script src="node_modules/cannon/tools/threejs/CannonDebugRenderer.js"></script>
+		<script src="examples/js/math/ConvexHull.js"></script>
+
+		<!-- include libraries -->
+
+		<script src="node_modules/tui-code-snippet/dist/tui-code-snippet.js"></script>
+		<script src="node_modules/raphael/raphael.min.js"></script>
+		<script src="node_modules/tui-chart/dist/tui-chart.min.js"></script>
+		<script src="node_modules/tui-chart/dist/maps/world.js"></script>
+		<script src="/socket.io/socket.io.js"></script>
+		<script src="game.js"></script>
+
+		<script>
+			let filter = "win16|win32|win64|mac|macintel";
+			let isMobile = false;
+			let test = [];
+			if (0 > filter.indexOf(navigator.platform.toLowerCase())) {
+				isMobile = true;
+			}
+			const socket = io();
+			if (isMobile) {
+				let abs,
+					alpha,
+					gamma,
+					beta = 2;
+				//모바일이라면 css제거!
+				var header = document.getElementById("container"); //제거하고자 하는 엘리먼트
+				header.parentNode.removeChild(header);
+
+				//데이터 전송 버튼
+				var btn = document.createElement("button");
+				var btnText = document.createTextNode("Click");
+				btn.appendChild(btnText);
+				document.body.appendChild(btn);
+				btn.onclick = function () {
+					alert("wewewe");
+				};
+				function handleOrientation(event) {
+					abs = event.absolute;
+					alpha = event.alpha;
+					beta = event.beta;
+					gamma = event.gamma;
+					let data = [alpha, beta, gamma];
+
+					socket.emit("handle", data);
+				}
+
+				window.addEventListener("deviceorientation", handleOrientation);
+			} else {
+				var game;
+				document.addEventListener("DOMContentLoaded", function () {
+					game = new Game();
+				});
+			}
+		</script>
+	</body>
+</html>

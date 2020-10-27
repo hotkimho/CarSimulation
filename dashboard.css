@@ -1,0 +1,127 @@
+#container {
+  position: relative;
+  height: 100%;
+}
+
+#dashboard {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+.gui-box {
+  background: #222b;
+  padding: 8px;
+  margin: 8px;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  border-radius: 2px;
+}
+
+#controls {
+  position: relative;
+  padding: 8px;
+  overflow: hidden;
+}
+#brake,
+#gas {
+  position: absolute;
+  border: 63px solid;
+  border-radius: 100%;
+  width: 200%;
+  height: 200%;
+  bottom: -50%;
+  box-sizing: border-box;
+  clip-path: inset(50% 50% 0 50%);
+}
+
+#brake {
+  left: -50%;
+  border-color: red;
+}
+
+#gas {
+  right: -50%;
+  border-color: green;
+}
+
+#wheel-wrapper {
+  position: relative;
+  width: 100px;
+  height: 100px;
+}
+
+#wheel {
+  width: 100px;
+  height: 100px;
+  mask-image: url("./gamesrc/images/wheel.png");
+  mask-size: contain;
+  -webkit-mask-image: url("./gamesrc/images/wheel.png");
+  -webkit-mask-size: contain;
+  background-color: hsl(0, 0%, 86%);
+}
+
+#wheel-marker {
+  height: 4px;
+  width: 3px;
+  border-radius: 1px;
+  background: #804000;
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  margin-left: -1.5px;
+}
+
+#wheel-pie {
+  height: 100%;
+  width: 100%;
+  clip-path: inset(0 0 0 50%);
+  left: 0;
+  position: absolute;
+  top: 0;
+  box-sizing: border-box;
+}
+
+#wheel-pie-left,
+#wheel-pie-right {
+  height: 100%;
+  width: 100%;
+  border: 2px solid #ff8000;
+  border-radius: 50%;
+  clip-path: inset(0 50% 0 0);
+  left: 0;
+  position: absolute;
+  top: 0;
+  box-sizing: border-box;
+}
+
+#stats {
+  padding: 8px 8px 8px 0;
+  width: 250px;
+
+  line-height: 1.2;
+}
+
+#overlay {
+  position: absolute;
+  top: 40px;
+  left: 400px;
+}
+#warning {
+  width: 50px;
+  height: 50px;
+  display: block;
+  background: url("./gamesrc/images/warning.png");
+  -webkit-background-size: contain;
+}
+
+#test {
+  background-image: url("./gamesrc/images/warning.png") no-repeat center center
+    fixed;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+}

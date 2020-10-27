@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link
+			rel="stylesheet"
+			type="text/css"
+			href="node_modules/tui-chart/dist/tui-chart.min.css"
+		/>
+		<style>
+			body {
+				margin: 0;
+			}
+			canvas {
+				display: block;
+			}
+			.img {
+				display: inline-block;
+				float: left;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="chart"></div>
+		<div id="imageContainer" class="img"></div>
+
+		<script src="node_modules/tui-code-snippet/dist/tui-code-snippet.js"></script>
+		<script src="node_modules/raphael/raphael.min.js"></script>
+		<script src="node_modules/tui-chart/dist/tui-chart.min.js"></script>
+		<script src="node_modules/tui-chart/dist/maps/world.js"></script>
+		<script src="/socket.io/socket.io.js"></script>
+		<script>
+			const socket = io();
+			socket.emit("connection", 2);
+			console.log(socket);
+
+			let centerScore = [5, 3, 1];
+			let obstacleScore = [10, 5];
+			let signalScore = [2, 1, 1];
+			let isImageData, isScoreData;
+
+			function tt() {
+				const imageBody = document.getElementById("imageContainer");
+				console.log(imageBody);
+				socket.on("imageData", function (data1, data2) {
+					for (let i = 0; i < data1.length; i++) {
+						let image1 = new Image(500, 500);
+						let image2 = new Image(500, 500);
+						image1.src = data1[i];
+						image2.src = data2[i];
+						imageBody.appendChild(image1);
+						imageBody.appendChild(image2);
+					}
+					isImageData = true;
+				});
+
+				socket.on("scoreData", function (data1) {
+					obstacleScore.push(data1);
+					console.log(obstacleScore);
+					isScoreData = true;
+					var container = document.getElementById("chart");
+					var data = {
+						categories: ["First", "Second", "Third"],
+						series: [
+							{
+								name: "CenterLine",
+								data: centerScore,
+							},
+							{
+								name: "obstacleCollision",
+								data: obstacleScore,
+							},
+							{
+								name: "Signal Violation",
+								data: [2, 1, 1],
+							},
+							{
+								name: "Avg",
+								data: [(5 + 10 + 2) / 3, (3 + 5) / 3, 4 / 3],
+							},
+						],
+					};
+					var options = {
+						chart: {
+							title: "CARSIMULATION",
+							width: window.innerWidth,
+							height: window.innerHeight,
+						},
+						yAxis: {
+							title: "위반 횟수",
+						},
+					};
+					tui.chart.columnChart(container, data, options);
+					isImageData = false;
+					isScoreData = false;
+				});
+			}
+			tt();
+			/*
+							function getParam(sname) {
+								var params = location.search.substr(location.search.indexOf("?") + 1);
+
+								var sval = "";
+
+								params = params.split("&");
+
+								for (var i = 0; i < params.length; i++) {
+									temp = params[i].split("=");
+
+									if ([temp[0]] == sname) {
+										sval = temp[1];
+									}
+								}
+
+								return sval;
+							}
+
+							let mid, collision;
+
+							console.log(getParam("data1"));
+							console.log(getParam("data2"));
+							console.log(getParam("data3"));
+							*/
+
+			console.log(isImageData, isScoreData);
+			window.onload = function () {};
+		</script>
+	</body>
+</html>
